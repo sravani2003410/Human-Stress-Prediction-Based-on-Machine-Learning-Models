@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.preprocessing import StandardScaler
+import pickle
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('SaYoPillow.csv')
+data.columns = ["Snoring Range", "Respiration Rate", "Body Temperature", "Limb Movement Rate", 
+                "Blood Oxygen", "Eye Movement", "Number Of Hours Sleep", "Heart Rate", "Stress Level"]
+
+X, y = data.drop('Stress Level', axis=1), data['Stress Level']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=9)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+rfc = RandomForestClassifier(n_estimators=60, random_state=23)
+rfc.fit(X_train, y_train)
+
+y_pred = rfc.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(5, 5))
+sns.heatmap(cm, annot=True, linewidths=0.5, linecolor="red", fmt=".0f")
+plt.xlabel("y_pred")
+plt.ylabel("y_true")
+plt.show()
+
+pickle.dump(rfc, open('stress.pkl', 'wb'))
+
+
+
+
